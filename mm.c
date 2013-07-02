@@ -64,14 +64,32 @@ team_t team = {
 #define PREV_BLKP(bp)  ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE))) //line:vm:mm:prevblkp
 
 
-/* Constants for fixed-width bins */
+/*
+ * Exact:
+ *	0	1	2	....	61
+ *	16	24	32	....	504
+ * Step1: step=64
+ *	62	63	64	....	85
+ *	512	576	640	....	1984
+ * Step2: step=2048
+ *	86		87		88		....	100
+ *	2048	4096	6144	....	30720
+ * Double
+ *	101		102		103		104		105		
+ *	32768	65535	131072	262144	524288
+ *
+ */
+/* Constants for bins */
+
 #define BINSIZE		126			/* Size of fixed-width bins */
-#define EXACT_BIN	62		/* Number of exact one size bins */
-#define STEP_BIN	24
-#define OTHER_BIN	BINSIZE-EXACT_BIN-STEP_BIN	/*Size of sorted bins */
-#define BIN_STEP	64
-#define MAX_EXACT	(1+EXACT_BIN)*DSIZE
-#define MAX_STEP	MAX_EXACT+BIN_STEP*STEP_BIN
+#define EXACT_BIN	62			/* Number of exact one size bins */
+#define STEP_BIN_1	24
+#define BIN_STEP_1	64
+#define STEP_BIN_2	15		
+#define BIN_STEP_2	2048
+#define MAX_EXACT	(1+EXACT_BIN)*DSIZE	 /* 504 */					
+#define MAX_STEP_1	(MAX_EXACT+BIN_STEP_1*STEP_BIN_1) /* 2040 */
+#define MAX_STEP_2	(MAX_STEP_1+BIN_STEP_2*STEP_BIN_2) /* 32760 */
 
 /* Global variables */
 static char *heap_listp = 0;  /* Pointer to first block */  
@@ -227,9 +245,7 @@ static void *coalesce(void *bp)
 		PUT(FTRP(NEXT_BLKP(bp)), PACK(size, 0));
 		bp = PREV_BLKP(bp);
 	}
-#ifdef BIN 
 	put_bin(bp);
-#endif
 	return bp;
 }
 
@@ -238,12 +254,18 @@ static void *coalesce(void *bp)
  */
 static void put_bin(void *bp)
 {
+#ifdef BIN
 	unsigned index;
 	size_t size;
 	size = GET_SIZE(HDRP(bp));
 	index = get_index(size);
 	char *dest_bin = bin_listp + WSIZE * index;
+#ifdef DEBUG
+	printf("%d %d\n",size, index);
+#endif
 #ifdef ASSERTS
+	assert(get_index(65535)==102);
+	assert(get_index(6144)==88);
 	assert(dest_bin < heap_listp);
 #endif
 	char *old_bp = GET_PTR(dest_bin);
@@ -268,17 +290,24 @@ static void put_bin(void *bp)
 		assert(checkblock(GET_PTR(bp)));
 
 	}
+
+#endif
+
+
+
 #endif
 }
 
 
 static void delete_bin(void *bp)
 {
+#ifdef BIN
 	char * prev = PREV_FBP(bp);
 	char * succ = NEXT_FBP(bp);
 	PUT_PTR(prev, succ);
 	if (succ != NULL)
 		PUT_PTR(succ+WSIZE, prev);
+#endif
 }
 
 /* 
@@ -290,22 +319,16 @@ static unsigned get_index(size_t size)
 		return size/DSIZE - 2;
 
 	}
-
-	else if (size <= MAX_STEP){
-		return (size-MAX_EXACT)/64 + EXACT_BIN;
+	else if (size <= MAX_STEP_1){
+		return (size-MAX_EXACT-DSIZE)/BIN_STEP_1 + EXACT_BIN;
 	}
-
+	else if (size <= MAX_STEP_2){
+		return (size-MAX_STEP_1-DSIZE)/BIN_STEP_2 + EXACT_BIN+STEP_BIN_1;
+	}
 	else {
-		unsigned r=0;
-#ifdef DEBUG 
-		size_t old_size = size;
-#endif
+		unsigned r =0;
 		while (size >>= 1) ++r;
-#ifdef DEBUG
-		size = old_size;
-//		printf("%d , %d\n", r, size);
-#endif
-		return (r-11+EXACT_BIN+STEP_BIN);
+		return (r-14+EXACT_BIN+STEP_BIN_1+STEP_BIN_2);
 	}
 }
 
@@ -387,25 +410,19 @@ static void *extend_heap(size_t words)
 static void place(void *bp, size_t asize)
 {
 	size_t csize = GET_SIZE(HDRP(bp));   
-#ifdef BIN
 		delete_bin(bp);
-#endif
 	if ((csize - asize) >= (2*DSIZE)) { 
 		PUT(HDRP(bp), PACK(asize, 1));
 		PUT(FTRP(bp), PACK(asize, 1));
 		bp = NEXT_BLKP(bp);
 		PUT(HDRP(bp), PACK(csize-asize, 0));
 		PUT(FTRP(bp), PACK(csize-asize, 0));
-#ifdef BIN
 		put_bin(bp);
-#endif
 	}
 	else { 
 		PUT(HDRP(bp), PACK(csize, 1));
 		PUT(FTRP(bp), PACK(csize, 1));
-#ifdef BIN
 		delete_bin(bp);
-#endif
 	}
 }
 /* $end mmplace */
