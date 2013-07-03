@@ -48,7 +48,7 @@ team_t team = {
 #define PUT_PTR(p, ptr) (*(unsigned int *)(p) = (unsigned int *)(ptr))
 
 /* Given block ptr bp, compute address of next and previous free blocks in its bin */
-#define PREV_FBP(p) GET_PTR((p)+WSIZE)
+#define PREV_FBP(p) GET_PTR(((char*)(p))+WSIZE)
 #define NEXT_FBP(p) GET_PTR((p))
 
 /* Read the size and allocated fields from address p */
@@ -97,7 +97,7 @@ static char *bin_listp = 0; /* Pointer to bin_list */
 
 /* Function prototypes for internal helper routines */
 static void *extend_heap(size_t words);
-static void place(void *bp, size_t asize);
+static void* place(void *bp, size_t asize);
 static void *find_fit(size_t asize);
 static void *coalesce(void *bp);
 static void printblock(void *bp); 
@@ -112,6 +112,7 @@ static void dump_bin();
 #define DEBUGx
 #define BIN
 #define ASSERTSx
+#define NEW_REALLOCx
 
 /* 
  * mm_init - Initialize the memory manager 
@@ -163,7 +164,7 @@ void *mm_malloc(size_t size)
 
 	/* Search the free list for a fit */
 	if ((bp = find_fit(asize)) != NULL) {  
-		place(bp, asize);                  
+		bp = place(bp, asize);                  
 #ifdef DEBUG
 		checkheap(1);
 		dump_bin();
@@ -175,7 +176,7 @@ void *mm_malloc(size_t size)
 	extendsize = MAX(asize,CHUNKSIZE);                
 	if ((bp = extend_heap(extendsize/WSIZE)) == NULL)  
 		return NULL;                                 
-	place(bp, asize);                     
+	bp = place(bp, asize);                     
 #ifdef DEBUG
 		printf("entend for memory \n");
 		checkheap(1);
@@ -260,12 +261,7 @@ static void put_bin(void *bp)
 	size = GET_SIZE(HDRP(bp));
 	index = get_index(size);
 	char *dest_bin = bin_listp + WSIZE * index;
-#ifdef DEBUG
-	printf("%d %d\n",size, index);
-#endif
 #ifdef ASSERTS
-	assert(get_index(65535)==102);
-	assert(get_index(6144)==88);
 	assert(dest_bin < heap_listp);
 #endif
 	char *old_bp = GET_PTR(dest_bin);
@@ -284,11 +280,13 @@ static void put_bin(void *bp)
 #ifdef ASSERTS
 	assert(GET_PTR(dest_bin)==bp);
 	assert(PREV_FBP(bp)==dest_bin);
+	printf("In put_bin, index:%d\n", index);
+	assert(bp==GET_PTR(dest_bin));
+	assert(PREV_FBP(GET_PTR(dest_bin))==dest_bin);
 	assert(checkblock(bp));
 	if (GET_PTR(bp)!=NULL){
 		//printblock(GET_PTR(bp));
 		assert(checkblock(GET_PTR(bp)));
-
 	}
 
 #endif
@@ -303,6 +301,9 @@ static void delete_bin(void *bp)
 {
 #ifdef BIN
 	char * prev = PREV_FBP(bp);
+#ifdef ASSERTS
+	assert(prev !=NULL);
+#endif
 	char * succ = NEXT_FBP(bp);
 	PUT_PTR(prev, succ);
 	if (succ != NULL)
@@ -351,6 +352,7 @@ void *mm_realloc(void *ptr, size_t size)
 		return mm_malloc(size);
 	}
 
+#ifndef NEW_REALLOC
 	newptr = mm_malloc(size);
 
 	/* If realloc() fails the original block is left untouched  */
@@ -367,6 +369,9 @@ void *mm_realloc(void *ptr, size_t size)
 	mm_free(ptr);
 
 	return newptr;
+#else
+	
+#endif
 }
 
 /* 
@@ -375,6 +380,7 @@ void *mm_realloc(void *ptr, size_t size)
 void mm_checkheap(int verbose)  
 { 
 }
+
 
 /* 
  * The remaining routines are internal helper routines 
@@ -407,23 +413,39 @@ static void *extend_heap(size_t words)
  * place - Place block of asize bytes at start of free block bp 
  *         and split if remainder would be at least minimum block size
  */
-static void place(void *bp, size_t asize)
+static void* place(void *bp, size_t asize)
 {
 	size_t csize = GET_SIZE(HDRP(bp));   
-		delete_bin(bp);
+	delete_bin(bp);
 	if ((csize - asize) >= (2*DSIZE)) { 
+		char *old_bp = bp;
+		bp = bp + csize-asize;
 		PUT(HDRP(bp), PACK(asize, 1));
 		PUT(FTRP(bp), PACK(asize, 1));
-		bp = NEXT_BLKP(bp);
-		PUT(HDRP(bp), PACK(csize-asize, 0));
-		PUT(FTRP(bp), PACK(csize-asize, 0));
-		put_bin(bp);
+#ifdef ASSERTS
+		assert(FTRP(bp)==FTRP(old_bp));
+#endif
+		PUT(HDRP(old_bp), PACK(csize-asize, 0));
+		PUT(FTRP(old_bp), PACK(csize-asize, 0));
+#ifdef ASSERTS
+		assert(NEXT_BLKP(old_bp)==bp);
+		assert(PREV_BLKP(bp)==old_bp);
+		assert(FTRP(old_bp)+WSIZE==HDRP(bp));
+#endif
+		put_bin(old_bp);
+#ifdef ASSERTS
+		int index = get_index(csize-asize);
+		char* dest_bin=bin_listp+WSIZE*index;
+		assert((char*)PREV_FBP(old_bp)==(char *)dest_bin);
+		assert(GET_PTR(dest_bin)==old_bp);
+		printf("IN place:%d \n",GET_SIZE(HDRP(old_bp)));
+#endif
 	}
 	else { 
 		PUT(HDRP(bp), PACK(csize, 1));
 		PUT(FTRP(bp), PACK(csize, 1));
-		delete_bin(bp);
 	}
+	return bp;
 }
 /* $end mmplace */
 
@@ -451,7 +473,13 @@ static void *find_fit(size_t asize)
 		bp = GET_PTR(bin_listp + index * WSIZE);
 		while (bp != NULL){
 			if (GET_SIZE(HDRP(bp)) >=asize)
+			{
+#ifdef ASSERTS
+				printf("In find_fit, bp:%x\n",bp);
+				assert(PREV_FBP(bp)!=NULL);
+#endif
 				return bp;
+			}
 			bp = GET_PTR(bp);
 		}
 	}
@@ -530,9 +558,12 @@ static void dump_bin()
 	for (index = 0;index < BINSIZE; ++index)
 	{
 		bp = GET_PTR(bin_listp + index * WSIZE);
-		if (bp != NULL) printf("index:%d \n",index);
+		if (bp != NULL) printf("In dump_bin,index:%d \n",index);
 		while (bp != NULL){
+			assert(PREV_FBP(bp)!=NULL);
 			printblock(bp);
+			printf("bp:%x\n",bp);
+			printf("%x\n",PREV_FBP(bp));
 			bp = GET_PTR(bp);
 		}
 	}

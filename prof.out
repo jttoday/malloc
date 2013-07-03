@@ -2,23 +2,22 @@ Flat profile:
 
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
- time   seconds   seconds    calls  Ts/call  Ts/call  name    
- 71.43      0.10     0.10                             add_range
- 28.57      0.14     0.04                             remove_range
-  0.00      0.14     0.00   434628     0.00     0.00  get_index
-  0.00      0.14     0.00   290628     0.00     0.00  put_bin
-  0.00      0.14     0.00   144000     0.00     0.00  place
-  0.00      0.14     0.00   123288     0.00     0.00  coalesce
-  0.00      0.14     0.00   120000     0.00     0.00  mm_free
-  0.00      0.14     0.00   120000     0.00     0.00  mm_malloc
-  0.00      0.14     0.00    24000     0.00     0.00  mem_heap_hi
-  0.00      0.14     0.00    24000     0.00     0.00  mem_heap_lo
-  0.00      0.14     0.00     3300     0.00     0.00  mem_sbrk
-  0.00      0.14     0.00     3288     0.00     0.00  extend_heap
-  0.00      0.14     0.00       10     0.00     0.00  eval_mm_speed
-  0.00      0.14     0.00       10     0.00     0.00  mem_reset_brk
-  0.00      0.14     0.00       10     0.00     0.00  mm_init
-  0.00      0.14     0.00        1     0.00     0.00  ftimer_gettod
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 50.03      0.01     0.01   230628     0.00     0.00  put_bin
+ 50.03      0.02     0.01   105874     0.00     0.00  coalesce
+  0.00      0.02     0.00   345828     0.00     0.00  get_index
+  0.00      0.02     0.00   115200     0.00     0.00  place
+  0.00      0.02     0.00   105598     0.00     0.00  mm_free
+  0.00      0.02     0.00   105598     0.00     0.00  mm_malloc
+  0.00      0.02     0.00    47990     0.00     0.00  mm_realloc
+  0.00      0.02     0.00    19200     0.00     0.00  mem_heap_hi
+  0.00      0.02     0.00    19200     0.00     0.00  mem_heap_lo
+  0.00      0.02     0.00      288     0.00     0.00  mem_sbrk
+  0.00      0.02     0.00      276     0.00     0.00  extend_heap
+  0.00      0.02     0.00       10     0.00     2.00  eval_mm_speed
+  0.00      0.02     0.00       10     0.00     0.00  mem_reset_brk
+  0.00      0.02     0.00       10     0.00     0.00  mm_init
+  0.00      0.02     0.00        1     0.00    20.01  ftimer_gettod
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -50,81 +49,87 @@ name       the name of the function.  This is the minor sort
 		     Call graph (explanation follows)
 
 
-granularity: each sample hit covers 4 byte(s) for 7.14% of 0.14 seconds
+granularity: each sample hit covers 2 byte(s) for 49.97% of 0.02 seconds
 
 index % time    self  children    called     name
-                                                 <spontaneous>
-[1]     71.4    0.10    0.00                 add_range [1]
-                0.00    0.00   24000/24000       mem_heap_lo [10]
-                0.00    0.00   24000/24000       mem_heap_hi [9]
+                0.00    0.02      10/10          ftimer_gettod [2]
+[1]    100.0    0.00    0.02      10         eval_mm_speed [1]
+                0.00    0.01   47990/47990       mm_realloc [5]
+                0.00    0.00   48010/105874      coalesce [4]
+                0.00    0.00   48010/105598      mm_malloc [7]
+                0.00    0.00      10/10          mm_init [8]
+                0.00    0.00   48010/105598      mm_free [11]
+                0.00    0.00      10/10          mem_reset_brk [16]
+-----------------------------------------------
+                0.00    0.02       1/1           fsecs [3]
+[2]    100.0    0.00    0.02       1         ftimer_gettod [2]
+                0.00    0.02      10/10          eval_mm_speed [1]
 -----------------------------------------------
                                                  <spontaneous>
-[2]     28.6    0.04    0.00                 remove_range [2]
+[3]    100.0    0.00    0.02                 fsecs [3]
+                0.00    0.02       1/1           ftimer_gettod [2]
 -----------------------------------------------
-                0.00    0.00  144000/434628      mm_malloc [8]
-                0.00    0.00  290628/434628      put_bin [4]
-[3]      0.0    0.00    0.00  434628         get_index [3]
+                0.00    0.00      12/105874      mm_init [8]
+                0.00    0.00     264/105874      mm_malloc [7]
+                0.00    0.00   48010/105874      eval_mm_speed [1]
+                0.01    0.00   57588/105874      mm_realloc [5]
+[4]     75.0    0.01    0.01  105874         coalesce [4]
+                0.01    0.00  115476/230628      put_bin [6]
 -----------------------------------------------
-                0.00    0.00  143340/290628      mm_malloc [8]
-                0.00    0.00  147288/290628      coalesce [6]
-[4]      0.0    0.00    0.00  290628         put_bin [4]
-                0.00    0.00  290628/434628      get_index [3]
+                0.00    0.01   47990/47990       eval_mm_speed [1]
+[5]     54.5    0.00    0.01   47990         mm_realloc [5]
+                0.01    0.00   57588/105874      coalesce [4]
+                0.00    0.00   57588/105598      mm_malloc [7]
+                0.00    0.00   57588/105598      mm_free [11]
 -----------------------------------------------
-                0.00    0.00  144000/144000      mm_malloc [8]
-[5]      0.0    0.00    0.00  144000         place [5]
+                0.00    0.00  115152/230628      mm_malloc [7]
+                0.01    0.00  115476/230628      coalesce [4]
+[6]     50.0    0.01    0.00  230628         put_bin [6]
+                0.00    0.00  230628/345828      get_index [9]
 -----------------------------------------------
-                0.00    0.00      12/123288      mm_init [15]
-                0.00    0.00    3276/123288      mm_malloc [8]
-                0.00    0.00  120000/123288      eval_mm_speed [13]
-[6]      0.0    0.00    0.00  123288         coalesce [6]
-                0.00    0.00  147288/290628      put_bin [4]
+                0.00    0.00   48010/105598      eval_mm_speed [1]
+                0.00    0.00   57588/105598      mm_realloc [5]
+[7]     25.2    0.00    0.01  105598         mm_malloc [7]
+                0.00    0.00  115152/230628      put_bin [6]
+                0.00    0.00     264/105874      coalesce [4]
+                0.00    0.00  115200/345828      get_index [9]
+                0.00    0.00  115200/115200      place [10]
+                0.00    0.00     264/276         extend_heap [15]
 -----------------------------------------------
-                0.00    0.00  120000/120000      eval_mm_speed [13]
-[7]      0.0    0.00    0.00  120000         mm_free [7]
+                0.00    0.00      10/10          eval_mm_speed [1]
+[8]      0.0    0.00    0.00      10         mm_init [8]
+                0.00    0.00      12/105874      coalesce [4]
+                0.00    0.00      12/288         mem_sbrk [14]
+                0.00    0.00      12/276         extend_heap [15]
 -----------------------------------------------
-                0.00    0.00  120000/120000      eval_mm_speed [13]
-[8]      0.0    0.00    0.00  120000         mm_malloc [8]
-                0.00    0.00  144000/434628      get_index [3]
-                0.00    0.00  144000/144000      place [5]
-                0.00    0.00  143340/290628      put_bin [4]
-                0.00    0.00    3276/123288      coalesce [6]
-                0.00    0.00    3276/3288        extend_heap [12]
+                0.00    0.00  115200/345828      mm_malloc [7]
+                0.00    0.00  230628/345828      put_bin [6]
+[9]      0.0    0.00    0.00  345828         get_index [9]
 -----------------------------------------------
-                0.00    0.00   24000/24000       add_range [1]
-[9]      0.0    0.00    0.00   24000         mem_heap_hi [9]
+                0.00    0.00  115200/115200      mm_malloc [7]
+[10]     0.0    0.00    0.00  115200         place [10]
 -----------------------------------------------
-                0.00    0.00   24000/24000       add_range [1]
-[10]     0.0    0.00    0.00   24000         mem_heap_lo [10]
+                0.00    0.00   48010/105598      eval_mm_speed [1]
+                0.00    0.00   57588/105598      mm_realloc [5]
+[11]     0.0    0.00    0.00  105598         mm_free [11]
 -----------------------------------------------
-                0.00    0.00      12/3300        mm_init [15]
-                0.00    0.00    3288/3300        extend_heap [12]
-[11]     0.0    0.00    0.00    3300         mem_sbrk [11]
+                0.00    0.00   19200/19200       add_range [18]
+[12]     0.0    0.00    0.00   19200         mem_heap_hi [12]
 -----------------------------------------------
-                0.00    0.00      12/3288        mm_init [15]
-                0.00    0.00    3276/3288        mm_malloc [8]
-[12]     0.0    0.00    0.00    3288         extend_heap [12]
-                0.00    0.00    3288/3300        mem_sbrk [11]
+                0.00    0.00   19200/19200       add_range [18]
+[13]     0.0    0.00    0.00   19200         mem_heap_lo [13]
 -----------------------------------------------
-                0.00    0.00      10/10          ftimer_gettod [16]
-[13]     0.0    0.00    0.00      10         eval_mm_speed [13]
-                0.00    0.00  120000/120000      mm_malloc [8]
-                0.00    0.00  120000/123288      coalesce [6]
-                0.00    0.00  120000/120000      mm_free [7]
-                0.00    0.00      10/10          mm_init [15]
-                0.00    0.00      10/10          mem_reset_brk [14]
+                0.00    0.00      12/288         mm_init [8]
+                0.00    0.00     276/288         extend_heap [15]
+[14]     0.0    0.00    0.00     288         mem_sbrk [14]
 -----------------------------------------------
-                0.00    0.00      10/10          eval_mm_speed [13]
-[14]     0.0    0.00    0.00      10         mem_reset_brk [14]
+                0.00    0.00      12/276         mm_init [8]
+                0.00    0.00     264/276         mm_malloc [7]
+[15]     0.0    0.00    0.00     276         extend_heap [15]
+                0.00    0.00     276/288         mem_sbrk [14]
 -----------------------------------------------
-                0.00    0.00      10/10          eval_mm_speed [13]
-[15]     0.0    0.00    0.00      10         mm_init [15]
-                0.00    0.00      12/3300        mem_sbrk [11]
-                0.00    0.00      12/123288      coalesce [6]
-                0.00    0.00      12/3288        extend_heap [12]
------------------------------------------------
-                0.00    0.00       1/1           fsecs [26]
-[16]     0.0    0.00    0.00       1         ftimer_gettod [16]
-                0.00    0.00      10/10          eval_mm_speed [13]
+                0.00    0.00      10/10          eval_mm_speed [1]
+[16]     0.0    0.00    0.00      10         mem_reset_brk [16]
 -----------------------------------------------
 
  This table describes the call tree of the program, and was sorted by
@@ -138,7 +143,7 @@ index % time    self  children    called     name
      index	A unique number given to each element of the table.
 		Index numbers are sorted numerically.
 		The index number is printed next to every function name so
-		it is easier to look up where the function in the table.
+		it is easier to look up where the function is in the table.
 
      % time	This is the percentage of the `total' time that was spent
 		in this function and its children.  Note that due to
@@ -212,9 +217,8 @@ index % time    self  children    called     name
 
 Index by function name
 
-   [1] add_range               [9] mem_heap_hi             [8] mm_malloc
-   [6] coalesce               [10] mem_heap_lo             [5] place
-  [13] eval_mm_speed          [14] mem_reset_brk           [4] put_bin
-  [12] extend_heap            [11] mem_sbrk                [2] remove_range
-  [16] ftimer_gettod           [7] mm_free
-   [3] get_index              [15] mm_init
+   [4] coalesce               [12] mem_heap_hi             [8] mm_init
+   [1] eval_mm_speed          [13] mem_heap_lo             [7] mm_malloc
+  [15] extend_heap            [16] mem_reset_brk           [5] mm_realloc
+   [2] ftimer_gettod          [14] mem_sbrk               [10] place
+   [9] get_index              [11] mm_free                 [6] put_bin
