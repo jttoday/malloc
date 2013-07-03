@@ -1,0 +1,174 @@
+Team Name:5120379037
+Member 1 :jin tian:myisjt@gmail.com
+Measuring performance with gettimeofday().
+In put_bin, index:87
+
+--------------------------
+malloc: 0x200
+In find_fit, bp:f6158210
+In put_bin, index:86
+IN place:3576 
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0xdf8:f] footer: [0xdf8:f]
+0xf6159008: header: [0x208:a] footer: [0x208:a]
+0xf6159210: EOL
+
+ dump bin start:
+In dump_bin,index:86 
+0xf6158210: header: [0xdf8:f] footer: [0xdf8:f]
+
+--------------------------
+malloc: 0x80
+In find_fit, bp:f6158210
+IN place:3440 
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0xd70:f] footer: [0xd70:f]
+0xf6158f80: header: [0x88:a] footer: [0x88:a]
+0xf6159008: header: [0x208:a] footer: [0x208:a]
+0xf6159210: EOL
+
+ dump bin start:
+In dump_bin,index:86 
+0xf6158210: header: [0xd70:f] footer: [0xd70:f]
+
+--------------------
+realloc: 0x280
+Simple realloc
+
+--------------------------
+malloc: 0x280
+In find_fit, bp:f6158210
+IN place:2792 
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0xae8:f] footer: [0xae8:f]
+0xf6158cf8: header: [0x288:a] footer: [0x288:a]
+0xf6158f80: header: [0x88:a] footer: [0x88:a]
+0xf6159008: header: [0x208:a] footer: [0x208:a]
+0xf6159210: EOL
+
+ dump bin start:
+In dump_bin,index:86 
+0xf6158210: header: [0xae8:f] footer: [0xae8:f]
+Free 520
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0xae8:f] footer: [0xae8:f]
+0xf6158cf8: header: [0x288:a] footer: [0x288:a]
+0xf6158f80: header: [0x88:a] footer: [0x88:a]
+0xf6159008: header: [0x208:f] footer: [0x208:f]
+0xf6159210: EOL
+In put_bin, index:62
+
+--------------------------
+malloc: 0x80
+In find_fit, bp:f6159008
+In put_bin, index:46
+IN place:384 
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0xae8:f] footer: [0xae8:f]
+0xf6158cf8: header: [0x288:a] footer: [0x288:a]
+0xf6158f80: header: [0x88:a] footer: [0x88:a]
+0xf6159008: header: [0x180:f] footer: [0x180:f]
+0xf6159188: header: [0x88:a] footer: [0x88:a]
+0xf6159210: EOL
+
+ dump bin start:
+In dump_bin,index:46 
+0xf6159008: header: [0x180:f] footer: [0x180:f]
+In dump_bin,index:86 
+0xf6158210: header: [0xae8:f] footer: [0xae8:f]
+Free 136
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0xae8:f] footer: [0xae8:f]
+0xf6158cf8: header: [0x288:a] footer: [0x288:a]
+0xf6158f80: header: [0x88:f] footer: [0x88:f]
+0xf6159008: header: [0x180:f] footer: [0x180:f]
+0xf6159188: header: [0x88:a] footer: [0x88:a]
+0xf6159210: EOL
+In put_bin, index:62
+
+--------------------
+realloc: 0x300
+IN place:2672 
+----
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0xa70:f] footer: [0xa70:f]
+0xf6158c80: header: [0x78:a] footer: [(nil):f]
+Error: header does not match footer
+0xf6158cf8: EOL
+Bad epilogue header
+
+ dump bin start:
+In dump_bin,index:62 
+0xf6158f80: header: [0x208:f] footer: [0x208:f]
+In dump_bin,index:86 
+0xf6158210: header: [0xa70:f] footer: [0xa70:f]
+
+--------------------------
+malloc: 0x80
+In find_fit, bp:f6158210
+IN place:2536 
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0x9e8:f] footer: [0x9e8:f]
+0xf6158bf8: header: [0x88:a] footer: [0x88:a]
+0xf6158c80: header: [0x78:a] footer: [(nil):f]
+Error: header does not match footer
+0xf6158cf8: EOL
+Bad epilogue header
+
+ dump bin start:
+In dump_bin,index:62 
+0xf6158f80: EOL
+In dump_bin,index:86 
+0xf6158210: header: [0x9e8:f] footer: [0x9e8:f]
+Free 136
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0x9e8:f] footer: [0x9e8:f]
+0xf6158bf8: header: [0x88:a] footer: [0x88:a]
+0xf6158c80: header: [0x78:a] footer: [(nil):f]
+Error: header does not match footer
+0xf6158cf8: EOL
+Bad epilogue header
+In put_bin, index:15
+
+--------------------
+realloc: 0x380
+Simple realloc
+
+--------------------------
+malloc: 0x380
+In find_fit, bp:f6158210
+In put_bin, index:79
+IN place:1632 
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0x660:f] footer: [0x660:f]
+0xf6158870: header: [0x388:a] footer: [0x388:a]
+0xf6158bf8: header: [0x88:a] footer: [0x88:a]
+0xf6158c80: header: [0x78:a] footer: [(nil):f]
+Error: header does not match footer
+0xf6158cf8: EOL
+Bad epilogue header
+
+ dump bin start:
+In dump_bin,index:15 
+0xf6158f80: header: [0x88:f] footer: [0x88:f]
+In dump_bin,index:79 
+0xf6158210: header: [0x660:f] footer: [0x660:f]
+Free 120
+Heap (0xf6158208):
+0xf6158208: header: [0x8:a] footer: [0x8:a]
+0xf6158210: header: [0x660:f] footer: [0x660:f]
+0xf6158870: header: [0x388:a] footer: [0x388:a]
+0xf6158bf8: header: [0x88:a] footer: [0x88:a]
+0xf6158c80: header: [0x78:f] footer: [0x78:f]
+0xf6158cf8: EOL
+Bad epilogue header

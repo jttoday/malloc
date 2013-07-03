@@ -107,12 +107,13 @@ static void put_bin(void *bp);
 static void delete_bin(void *bp);
 static unsigned get_index(size_t size);
 static void dump_bin();
+static void replace_bin(void *bp);
 
 
-#define DEBUGx
+#define DEBUG
 #define BIN
-#define ASSERTSx
-#define NEW_REALLOCx
+#define ASSERTS
+#define NEW_REALLOC
 
 /* 
  * mm_init - Initialize the memory manager 
@@ -143,7 +144,7 @@ int mm_init(void)
 void *mm_malloc(size_t size) 
 {
 #ifdef DEBUG
-	printf("\n--------------------------\nmalloc: %d\n", size);
+	printf("\n--------------------------\nmalloc: 0x%x\n", size);
 #endif
 	size_t asize;      /* Adjusted block size */
 	size_t extendsize; /* Amount to extend heap if no fit */
@@ -311,6 +312,13 @@ static void delete_bin(void *bp)
 #endif
 }
 
+static void replace_bin(void *bp)
+{
+#ifdef BIN
+	delete_bin(bp);
+	put_bin(bp);
+#endif
+}
 /* 
  * get_index - get the index of bins in which can the free block put
  */
@@ -338,6 +346,10 @@ static unsigned get_index(size_t size)
  */
 void *mm_realloc(void *ptr, size_t size)
 {
+#ifdef DEBUG
+	printf("\n--------------------\n");
+	printf("realloc: 0x%x\n", size);
+#endif
 	size_t oldsize;
 	void *newptr;
 
@@ -370,6 +382,36 @@ void *mm_realloc(void *ptr, size_t size)
 
 	return newptr;
 #else
+	oldsize = GET_SIZE(HDRP(ptr));
+	if (size <= oldsize) {
+#ifdef DEBUG
+		printf("not to do\n");
+#endif
+		return ptr;
+	}
+
+	/* Check if previous block is free */
+	char * prev_block=PREV_BLKP(ptr);
+	unsigned prev_size = GET_SIZE(HDRP(prev_block));
+	if (!GET_ALLOC(HDRP(prev_block)) && oldsize+prev_size >= size) {
+		newptr = place(prev_block, size-oldsize);
+		memmove(newptr, ptr, size-oldsize);
+#ifdef DEBUG
+		checkheap(1);
+		dump_bin();
+#endif
+		return newptr;
+	}
+	/* Otherwise malloc ,copy and free simply. */
+#ifdef DEBUG
+	printf("Simple realloc\n");
+#endif
+	newptr = mm_malloc(size);
+	if (newptr == NULL)
+		return NULL;
+	memcpy(newptr, ptr, oldsize);
+	mm_free(ptr);
+	return newptr;
 	
 #endif
 }
@@ -416,9 +458,10 @@ static void *extend_heap(size_t words)
 static void* place(void *bp, size_t asize)
 {
 	size_t csize = GET_SIZE(HDRP(bp));   
-	delete_bin(bp);
 	if ((csize - asize) >= (2*DSIZE)) { 
 		char *old_bp = bp;
+		unsigned old_index=get_index(csize);
+		unsigned new_index=get_index(csize-asize);
 		bp = bp + csize-asize;
 		PUT(HDRP(bp), PACK(asize, 1));
 		PUT(FTRP(bp), PACK(asize, 1));
@@ -432,7 +475,8 @@ static void* place(void *bp, size_t asize)
 		assert(PREV_BLKP(bp)==old_bp);
 		assert(FTRP(old_bp)+WSIZE==HDRP(bp));
 #endif
-		put_bin(old_bp);
+		if (old_index!=new_index)
+			replace_bin(old_bp);
 #ifdef ASSERTS
 		int index = get_index(csize-asize);
 		char* dest_bin=bin_listp+WSIZE*index;
@@ -444,6 +488,7 @@ static void* place(void *bp, size_t asize)
 	else { 
 		PUT(HDRP(bp), PACK(csize, 1));
 		PUT(FTRP(bp), PACK(csize, 1));
+		delete_bin(bp);
 	}
 	return bp;
 }
@@ -491,7 +536,6 @@ static void printblock(void *bp)
 {
 	size_t hsize, halloc, fsize, falloc;
 
-	checkheap(0);
 	hsize = GET_SIZE(HDRP(bp));
 	halloc = GET_ALLOC(HDRP(bp));  
 	fsize = GET_SIZE(FTRP(bp));
@@ -562,8 +606,6 @@ static void dump_bin()
 		while (bp != NULL){
 			assert(PREV_FBP(bp)!=NULL);
 			printblock(bp);
-			printf("bp:%x\n",bp);
-			printf("%x\n",PREV_FBP(bp));
 			bp = GET_PTR(bp);
 		}
 	}
